@@ -5,4 +5,29 @@
 </style></head><body><main class="wrap"><header class="nav"><div class="brand"><div class="mark">♛</div>APEX</div><div class="tag">الموقع الرسمي للتطبيق</div></header>
 <section class="hero"><div class="eyebrow">APEX • OFFICIAL APP</div><h1>تجربة تسوّق <span>بمستوى جديد</span></h1><p>كل تجربة APEX في تطبيق واحد. نزّل التطبيق على جهاز Android، وتابع أحدث الإصدارات والتحديثات من هنا.</p><div class="actions"><a class="btn primary disabled" id="download" href="#" aria-disabled="true">⬇ تنزيل التطبيق</a><a class="btn secondary disabled" id="update" href="#" aria-disabled="true">↻ تحديث التطبيق</a></div><div class="status" id="status">جارٍ التحقق من أحدث إصدار…</div></section>
 <section class="panel"><h2>مميزات تطبيق APEX</h2><div class="features"><div class="feature"><div class="ico">🛍️</div><div><b>تسوّق بسهولة</b><small>تصفح المنتجات وابحث عنها وأدر مفضلتك وسلتك.</small></div></div><div class="feature"><div class="ico">📦</div><div><b>متابعة الطلبات</b><small>تابع حالة طلباتك وتفاصيل الشحن من حسابك.</small></div></div><div class="feature"><div class="ico">🔐</div><div><b>حسابك بأمان</b><small>دخول للحساب وإدارة بياناتك وخيارات الدفع المتاحة.</small></div></div></div><div class="release"><span>الإصدار الحالي: <strong id="version">سيُعلن عند توفر النسخة</strong></span><span>النظام: <strong>Android</strong></span></div></section><footer>© <span id="year"></span> APEX. جميع الحقوق محفوظة.</footer></main>
-<script>document.getElementById('year').textContent=new Date().getFullYear();const releases='https://github.com/almhmdey8-code/APEX-1/releases/latest';for(const id of ['download','update']){const el=document.getElementById(id);el.href=releases;el.target='_blank';el.rel='noopener noreferrer';el.classList.remove('disabled');el.removeAttribute('aria-disabled')}document.getElementById('status').textContent='الأزرار مفعّلة وتفتح صفحة إصدارات التطبيق.';</script></body></html>
+<script>
+document.getElementById('year').textContent=new Date().getFullYear();
+(async()=>{
+ const status=document.getElementById('status');
+ const download=document.getElementById('download');
+ const update=document.getElementById('update');
+ try{
+  const response=await fetch('./version.json?ts='+Date.now(),{cache:'no-store'});
+  if(!response.ok) throw new Error('version unavailable');
+  const release=await response.json();
+  if(!release.file) throw new Error('APK file missing');
+  const apk='./'+encodeURIComponent(release.file);
+  for(const el of [download,update]){
+   el.href=apk;
+   el.setAttribute('download',release.file);
+   el.classList.remove('disabled');
+   el.removeAttribute('aria-disabled');
+  }
+  const label=release.version||'متاح';
+  document.getElementById('version').textContent=label;
+  status.textContent='أحدث إصدار متاح للتنزيل مباشرة.';
+ }catch(error){
+  status.textContent='تعذر تحميل معلومات الإصدار. حاول تحديث الصفحة.';
+ }
+})();
+</script></body></html>
