@@ -7,25 +7,47 @@
 <section class="panel"><h2>مميزات تطبيق APEX</h2><div class="features"><div class="feature"><div class="ico">🛍️</div><div><b>تسوّق بسهولة</b><small>تصفح المنتجات وابحث عنها وأدر مفضلتك وسلتك.</small></div></div><div class="feature"><div class="ico">📦</div><div><b>متابعة الطلبات</b><small>تابع حالة طلباتك وتفاصيل الشحن من حسابك.</small></div></div><div class="feature"><div class="ico">🔐</div><div><b>حسابك بأمان</b><small>دخول للحساب وإدارة بياناتك وخيارات الدفع المتاحة.</small></div></div></div><div class="release"><span>الإصدار الحالي: <strong id="version">سيُعلن عند توفر النسخة</strong></span><span>النظام: <strong>Android</strong></span></div></section><footer>© <span id="year"></span> APEX. جميع الحقوق محفوظة.</footer></main>
 <script>
 document.getElementById('year').textContent=new Date().getFullYear();
-(async()=>{
- const status=document.getElementById('status');
- const download=document.getElementById('download');
- const update=document.getElementById('update');
+const status=document.getElementById('status');
+const download=document.getElementById('download');
+const update=document.getElementById('update');
+let latestRelease=null;
+function setReady(el){
+ el.classList.remove('disabled');
+ el.removeAttribute('aria-disabled');
+}
+async function refreshRelease(){
+ const response=await fetch('./version.json?ts='+Date.now(),{cache:'no-store'});
+ if(!response.ok) throw new Error('version unavailable');
+ const release=await response.json();
+ if(!release.file) throw new Error('APK file missing');
+ latestRelease=release;
+ download.href='./'+encodeURIComponent(release.file)+'?v='+encodeURIComponent(release.versionCode||release.version||Date.now());
+ download.setAttribute('download',release.file);
+ setReady(download);
+ setReady(update);
+ document.getElementById('version').textContent=release.version||'متاح';
+ return release;
+}
+update.addEventListener('click',async(event)=>{
+ event.preventDefault();
+ update.classList.add('disabled');
+ update.setAttribute('aria-disabled','true');
+ status.textContent='جارٍ تحديث بيانات الموقع والتحقق من أحدث إصدار…';
  try{
-  const response=await fetch('./version.json?ts='+Date.now(),{cache:'no-store'});
-  if(!response.ok) throw new Error('version unavailable');
-  const release=await response.json();
-  if(!release.file) throw new Error('APK file missing');
-  const apk='./'+encodeURIComponent(release.file);
-  for(const el of [download,update]){
-   el.href=apk;
-   el.setAttribute('download',release.file);
-   el.classList.remove('disabled');
-   el.removeAttribute('aria-disabled');
-  }
-  const label=release.version||'متاح';
-  document.getElementById('version').textContent=label;
-  status.textContent='تم تحديث الموقع بنجاح — الإصدار '+label+' هو أحدث إصدار، وزر التنزيل يحمّل النسخة الجديدة.';
+  const release=await refreshRelease();
+  status.textContent='تم تحديث الموقع بنجاح — الإصدار '+(release.version||'الأحدث')+' هو أحدث إصدار. اضغط «تنزيل التطبيق» لتحميل النسخة الجديدة.';
+ }catch(error){
+  status.textContent='تعذر تحديث بيانات الإصدار. حاول مرة أخرى.';
+ }finally{
+  update.classList.remove('disabled');
+  update.removeAttribute('aria-disabled');
+ }
+});
+(async()=>{
+ status.textContent='جارٍ التحقق من أحدث إصدار…';
+ try{
+  const release=await refreshRelease();
+  status.textContent='الإصدار '+(release.version||'الأحدث')+' جاهز للتنزيل. اضغط «تحديث التطبيق» للتحقق من آخر نسخة، ثم «تنزيل التطبيق».';
  }catch(error){
   status.textContent='تعذر تحميل معلومات الإصدار. حاول تحديث الصفحة.';
  }
