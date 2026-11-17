@@ -25,7 +25,7 @@ document.getElementById('year').textContent=new Date().getFullYear();
   }
   const label=release.version||'متاح';
   document.getElementById('version').textContent=label;
-  status.textContent='أحدث إصدار متاح للتنزيل مباشرة.';
+  status.textContent='تم تحديث الموقع بنجاح — الإصدار '+label+' هو أحدث إصدار، وزر التنزيل يحمّل النسخة الجديدة.';
  }catch(error){
   status.textContent='تعذر تحميل معلومات الإصدار. حاول تحديث الصفحة.';
  }
